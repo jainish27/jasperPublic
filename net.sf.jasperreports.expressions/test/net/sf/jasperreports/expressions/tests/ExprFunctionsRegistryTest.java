@@ -3,20 +3,16 @@
  */
 package net.sf.jasperreports.expressions.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.jasperreports.engine.fonts.FontFamily;
-import net.sf.jasperreports.expressions.ExprFunctionsRegistryFactory;
 import net.sf.jasperreports.expressions.JRExprFunctions;
 import net.sf.jasperreports.extensions.ExtensionsEnvironment;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.omg.PortableInterceptor.SUCCESSFUL;
 
 /**
  * @author gtoffoli
