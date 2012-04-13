@@ -22,7 +22,8 @@ import net.sf.jasperreports.extensions.ExtensionsEnvironment;
  */
 public class FunctionsLibraryUtil {
 	
-	private static Map<String, List<JRExprFunctionBean>> functionsByCategory=null;	
+	private static Map<String, List<JRExprFunctionBean>> functionsByCategory=null;
+	private static List<JRExprFunctionBean> allFunctions=null;
 
 	/**
 	 * Returns the list of built-in categories.
@@ -39,6 +40,7 @@ public class FunctionsLibraryUtil {
 	private static void initLibrary() {
 		// Initialize support data structures
 		functionsByCategory=new HashMap<String, List<JRExprFunctionBean>>();
+		allFunctions=new ArrayList<JRExprFunctionBean>();
 		
 		// Try to load the JR extensions
 		List<JRExprFunctions> extensionObjects = ExtensionsEnvironment.getExtensionsRegistry().getExtensions(JRExprFunctions.class);
@@ -56,6 +58,9 @@ public class FunctionsLibraryUtil {
 						functionsByCategory.put(category, new ArrayList<JRExprFunctionBean>());
 					}
 					functionsByCategory.get(category).add(f);
+					if(!allFunctions.contains(f)){
+						allFunctions.add(f);
+					}
 				}
 			}
 		}
@@ -76,5 +81,47 @@ public class FunctionsLibraryUtil {
 		}
 		final List<JRExprFunctionBean> list = functionsByCategory.get(categoryKey);
 		return list!=null ? list : new ArrayList<JRExprFunctionBean>(0);
+	}
+	
+	/**
+	 * Returns the list of functions, no matter which category they belong to.
+	 * 
+	 * <p>
+	 * According to this, if a function belongs to more categories it will appear only
+	 * once inside the returned list. Moreover, the list is not guaranteed to be sorted.
+	 * 
+	 * @return the complete list of all functions available
+	 */
+	public static List<JRExprFunctionBean> getAllFunctions(){
+		if(allFunctions==null){
+			initLibrary();
+		}
+		return allFunctions;
+	}
+	
+	/**
+	 * Checks if it exists a function inside the library with the specified name.
+	 * 
+	 * @param functionName the function name
+	 * @return <code>true</code> if a function exists, <code>false</code> otherwise
+	 */
+	public static boolean existsFunction(String functionName){
+		for (JRExprFunctionBean f : getAllFunctions()){
+			if(f.getName().equals(functionName)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Forces the reload of the functions library.
+	 */
+	public static void reloadLibrary(){
+		functionsByCategory.clear();
+		functionsByCategory=null;
+		allFunctions.clear();
+		allFunctions=null;
+		initLibrary();
 	}
 }
