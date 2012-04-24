@@ -14,6 +14,13 @@ import net.sf.jasperreports.expressions.annotations.JRExprFunctionCategories;
 import net.sf.jasperreports.expressions.annotations.JRExprFunctionParameter;
 import net.sf.jasperreports.expressions.annotations.JRExprFunctionParameters;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.Days;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 
 /**
  * This class should maintain all function methods that belongs to the category {@link CategoryKeys#DATE_TIME}.
@@ -151,8 +158,8 @@ public final class DateTimeFunctions {
 		@JRExprFunctionParameter(name="Day",description="The day of the new date.")})
 	public static Date DATE(Integer year, Integer month, Integer dayOfMonth){
 		if(year==null || month==null || dayOfMonth==null) return null;
-		GregorianCalendar calendar = new GregorianCalendar(year, month-1, dayOfMonth);
-		return calendar.getTime();
+		DateTime dt=new DateTime(year,month,dayOfMonth,0,0,0);
+		return dt.toDate();
 	}
 	
 	// ===================== DATEVALUE function ===================== //
@@ -167,7 +174,7 @@ public final class DateTimeFunctions {
 	
 	// ===================== TIME function ===================== //
 	@JRExprFunction(name="TIME",description="Returns a text string representing a time value (hours, seconds and minutes). " +
-			"If no specific pattern is specified a compact formatter is used.")
+			"If no specific pattern is specified a default formatter is used.")
 	@JRExprFunctionCategories({DATE_TIME})
 	@JRExprFunctionParameters({
 		@JRExprFunctionParameter(name="Hours",description="The hours for the new time value."),
@@ -175,27 +182,25 @@ public final class DateTimeFunctions {
 		@JRExprFunctionParameter(name="Seconds",description="The seconds for the new time value."),
 		@JRExprFunctionParameter(name="Format pattern",description="The pattern to format the time value.")})
 	public static String TIME(Integer hours, Integer minutes, Integer seconds){
-		if(hours==null || minutes==null || seconds==null) return null;
-		GregorianCalendar calendar = new GregorianCalendar();
-		calendar.set(Calendar.HOUR_OF_DAY, hours);
-		calendar.set(Calendar.MINUTE, minutes);
-		calendar.set(Calendar.SECOND, seconds);
-		return SimpleDateFormat.getTimeInstance().format(calendar.getTime());
+		return TIME(hours, minutes, seconds, null);
 	}
 	
 	public static String TIME(Integer hours, Integer minutes, Integer seconds, String timePattern){
 		if(hours==null || minutes==null || seconds==null) return null;
-		GregorianCalendar calendar = new GregorianCalendar();
-		calendar.set(Calendar.HOUR_OF_DAY, hours);
-		calendar.set(Calendar.MINUTE, minutes);
-		calendar.set(Calendar.SECOND, seconds);
-		if(timePattern==null){
-			return SimpleDateFormat.getTimeInstance().format(calendar.getTime());	
+		LocalTime lt=new LocalTime(hours,minutes,seconds);
+		if(timePattern==null) {
+			return lt.toString(DateTimeFormat.longTime()); 
 		}
-		else {
-			// TODO - performs checks on the timePattern, allowing only timing stuff?!
-			SimpleDateFormat df=new SimpleDateFormat(timePattern);
-			return df.format(calendar.getTime());
+		else{
+			try{
+				// Try to convert to a pattern
+				DateTimeFormatter dtf = DateTimeFormat.forPattern(timePattern);
+				return lt.toString(dtf);
+			}
+			catch (IllegalArgumentException ex){
+				// Fallback to the default solution
+				return lt.toString(DateTimeFormat.longTime()); 
+			}			
 		}
 	}
 	
@@ -210,31 +215,110 @@ public final class DateTimeFunctions {
 			return null;
 		}
 		else{
-			GregorianCalendar calendar=new GregorianCalendar();
-			calendar.setTime(convertedDate);
-			return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+			DateTime dt=new DateTime(convertedDate);
+			return dt.dayOfMonth().withMaximumValue().getDayOfMonth();
 		}
 	}
 	
 	// ===================== EDATE function ===================== //
-	@JRExprFunction(name="EDATE",description="Returns a date, a number of months away.")
+	@JRExprFunction(name="EDATE",description="Returns a date a number of months away.")
 	@JRExprFunctionCategories({DATE_TIME})
 	@JRExprFunctionParameters({
-		@JRExprFunctionParameter(name="Date object",description="The object representing the date.")})
+		@JRExprFunctionParameter(name="Date object",description="The object representing the date."),
+		@JRExprFunctionParameter(name="Months",description="The number of months after the given date.")})
 	public static Date EDATE(Object dateObject, Integer months){
 		Date convertedDate = convertDateObject(dateObject);
 		if(convertedDate==null){
 			return null;
 		}
 		else{
-			GregorianCalendar calendar=new GregorianCalendar();
-			calendar.setTime(convertedDate);
-			calendar.add(Calendar.MONTH, months);
-			return calendar.getTime();
+			DateTime dt=new DateTime(convertedDate);
+			dt.plusMonths(months);
+			return dt.toDate();
 		}
 	}
 	
+	// ===================== WORKDAY function ===================== //
+	@JRExprFunction(name="WORKDAY",description="Returns a date a number of workdays away. " +
+			"Saturday and Sundays are not considered working days.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Date object",description="The object representing the date."),
+		@JRExprFunctionParameter(name="Working days",description="The number of days after the given date.")})
+	public static Date WORKDAY(Object dateObject, Integer workdays){
+		Date convertedDate = convertDateObject(dateObject);
+		if(convertedDate==null){
+			return null;
+		}
+		else{
+			DateTime cursorDT=new DateTime(convertedDate);
+			int remainingDays=workdays;
+			while(remainingDays>0){
+				int dayOfWeek = cursorDT.getDayOfWeek();
+				if(!(dayOfWeek==DateTimeConstants.SATURDAY || 
+						dayOfWeek==DateTimeConstants.SUNDAY)){
+					// Decrement remaining days only when it is not Saturday or Sunday
+					remainingDays--;
+				}
+				cursorDT.plusDays(1);
+			}
+			return cursorDT.toDate();
+		}
+	}
 	
+	// ===================== NETWORKDAYS function ===================== //
+	@JRExprFunction(name="NETWORKDAYS",description="Returns the number of working days between two dates (inclusive)." +
+			"Saturday and Sundays are not considered working days.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Start date",description="The initial date."),
+		@JRExprFunctionParameter(name="End date",description="The end date.")})
+	public static Integer NETWORKDAYS(Object startDate, Object endDate){
+		Date startDateObj = convertDateObject(startDate);
+		Date endDateObj = convertDateObject(endDate);
+		if(startDateObj==null || endDateObj==null){
+			return null;
+		}
+		else{
+			DateTime cursorDateTime=new DateTime(startDateObj);
+			DateTime endDateTime=new DateTime(endDateObj);
+			int workingDays=0;
+			if(cursorDateTime.isAfter(endDateTime)){
+				// Swap data information
+				DateTime tmp=cursorDateTime;
+				cursorDateTime=endDateTime;
+				endDateTime=tmp;
+			}
+			while (Days.daysBetween(cursorDateTime, endDateTime).getDays()>0){
+				int dayOfWeek = cursorDateTime.getDayOfWeek();
+				if(!(dayOfWeek==DateTimeConstants.SATURDAY || 
+						dayOfWeek==DateTimeConstants.SUNDAY)){
+					workingDays++;
+				}
+				cursorDateTime.plusDays(1);
+			}
+			return workingDays;
+		}
+	}
+	
+	// ===================== DAYS function ===================== //
+	@JRExprFunction(name="DAYS",description="Returns the number of days between two dates.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Start date",description="The initial date."),
+		@JRExprFunctionParameter(name="End date",description="The end date.")})
+	public static Integer DAYS(Object startDate, Object endDate){
+		Date startDateObj = convertDateObject(startDate);
+		Date endDateObj = convertDateObject(endDate);
+		if(startDateObj==null || endDateObj==null){
+			return null;
+		}
+		else{
+			DateTime dt1=new DateTime(startDateObj);
+			DateTime dt2=new DateTime(endDateObj);
+			return Days.daysBetween(dt1, dt2).getDays();
+		}
+	}
 	
 	/* Internal private methods */
 	
