@@ -9,7 +9,6 @@ import java.util.Map;
 import net.sf.jasperreports.expressions.JRExprFunctions;
 import net.sf.jasperreports.expressions.annotations.JRExprAnnotationsUtils;
 import net.sf.jasperreports.expressions.annotations.JRExprFunctionBean;
-import net.sf.jasperreports.expressions.functions.CategoryKeys;
 import net.sf.jasperreports.extensions.ExtensionsEnvironment;
 
 /**
@@ -17,7 +16,6 @@ import net.sf.jasperreports.extensions.ExtensionsEnvironment;
  * embeddable in a JasperReports expression.
  * 
  * @author Massimo Rabbi (mrabbi@users.sourceforge.net)
- * @see CategoryKeys
  *
  */
 public class FunctionsLibraryUtil {
