@@ -3,7 +3,7 @@ package net.sf.jasperreports.expressions.functions;
 import static net.sf.jasperreports.expressions.functions.CategoryKeys.TEXT;
 
 import java.text.DecimalFormat;
-import java.util.StringTokenizer;
+import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +25,6 @@ public final class TextFunctions {
 	private static final int BASE_MAX_RADIX=36;
 
 	// ===================== BASE function ===================== //
-	
 	@JRExprFunction(name="BASE",description="Returns a text representation of a number, in a specified base radix.")
 	@JRExprFunctionCategories({TEXT})
 	@JRExprFunctionParameters({
@@ -50,7 +49,6 @@ public final class TextFunctions {
 	}
 
 	// ===================== CHAR function ===================== //
-
 	@JRExprFunction(name="CHAR",description="Returns a single text character, given a character code.")
 	@JRExprFunctionCategories({TEXT})
 	@JRExprFunctionParameters({
@@ -121,6 +119,16 @@ public final class TextFunctions {
 			return null;
 		}
 	}
+
+	// ===================== DOUBLE_VALUE function ===================== //
+	@JRExprFunction(name="DOUBLE_VALUE", description="Returns a Double number representing the given text string.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Number (as text)",description="The input text string representing a number.")})
+	public static Double DOUBLE_VALUE(String textNumber){
+		if(textNumber==null) return null;
+		return Double.parseDouble(textNumber);
+	}	
 	
 	// ===================== FIND function ===================== //
 	@JRExprFunction(name="FIND",description="Returns the character position of a string inside another text. If the text is not found then -1 is returned.")
@@ -168,6 +176,26 @@ public final class TextFunctions {
 	    return myFormatter.format(number);
 	}
 	
+	// ===================== FLOAT_VALUE function ===================== //
+	@JRExprFunction(name="FLOAT_VALUE", description="Returns a Float number representing the given text string.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Number (as text)",description="The input text string representing a number.")})
+	public static Float FLOAT_VALUE(String textNumber){
+		if(textNumber==null) return null;
+		return Float.parseFloat(textNumber);
+	}
+	
+	// ===================== INTEGER_VALUE function ===================== //
+	@JRExprFunction(name="INTEGER_VALUE", description="Returns an Integer number representing the given text string.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Number (as text)",description="The input text string representing a number.")})
+	public static Integer INTEGER_VALUE(String textNumber){
+		if(textNumber==null) return null;
+		return Integer.parseInt(textNumber);
+	}
+	
 	// ===================== LEFT function ===================== //
 	@JRExprFunction(name="LEFT", description="Returns the specified number of characters (1 by default) from the left side of the input text.")
 	@JRExprFunctionCategories({TEXT})
@@ -193,6 +221,16 @@ public final class TextFunctions {
 		return text.length();
 	}
 
+	// ===================== LONG_VALUE function ===================== //
+	@JRExprFunction(name="LONG_VALUE", description="Returns a Long number representing the given text string.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Number (as text)",description="The input text string representing a number.")})
+	public static Long LONG_VALUE(String textNumber){
+		if(textNumber==null) return null;
+		return Long.parseLong(textNumber);
+	}
+
 	// ===================== LOWER function ===================== //
 	@JRExprFunction(name="LOWER", description="Performs the lower case conversion of the specified text string.")
 	@JRExprFunctionCategories({TEXT})
@@ -203,6 +241,16 @@ public final class TextFunctions {
 		return text.toLowerCase();
 	}
 
+	// ===================== LTRIM function ===================== //
+	@JRExprFunction(name="LTRIM", description="Clear a string, removing leading whitespaces.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Text",description="The text string to be trimmed.")})
+	public static String LTRIM(String text){
+		if(text==null) return null;
+		return text.replaceAll("^\\s+", "");
+	}
+		
 	// ===================== MID function ===================== //
 	@JRExprFunction(name="MID", description="Returns the text from the middle of a text string.")
 	@JRExprFunctionCategories({TEXT})
@@ -295,6 +343,16 @@ public final class TextFunctions {
 		return text.substring(length-charactersNum,length);
 	}
 	
+	// ===================== RTRIM function ===================== //
+	@JRExprFunction(name="RTRIM", description="Clear a string, removing trailing whitespaces.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Text",description="The text string to be trimmed.")})
+	public static String RTRIM(String text){
+		if(text==null) return null;
+		return text.replaceAll("\\s+$", "");
+	}	
+	
 	// ===================== SEARCH function ===================== //
 	@JRExprFunction(name="SEARCH", description="Returns the position of a string of text in another string. Search is not case-sensitive")
 	@JRExprFunctionCategories({TEXT})
@@ -349,6 +407,42 @@ public final class TextFunctions {
 			// Fall-back
 			return null;					
 		}
+	}
+	
+	// ===================== T function ===================== //
+	@JRExprFunction(name="T", description="Returns the text string if the value is a string, otherwise an empty string is returned.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Generic value",description="The object value to be tested.")})
+	public static String T(Object value){
+		if(value instanceof String) {
+			return (String)value;
+		}
+		else{
+			return "";
+		}
+	}	
+	
+	// ===================== TEXT function ===================== //
+	@JRExprFunction(name="TEXT", description="Converts a number into a text string according to a specified format.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Number",description="The number to be formatted."),
+			@JRExprFunctionParameter(name="Format",description="The format pattern.")})
+	public static String TEXT(Number number, String numberFormat){
+		if(number==null || numberFormat==null) return null;
+		NumberFormat nformat=new DecimalFormat(numberFormat);
+		return nformat.format(number);
+	}	
+	
+	// ===================== TRIM function ===================== //
+	@JRExprFunction(name="TRIM", description="Clear a string,removing leading and trailing whitespaces.")
+	@JRExprFunctionCategories({TEXT})
+	@JRExprFunctionParameters({
+			@JRExprFunctionParameter(name="Text",description="The text string to be trimmed.")})
+	public static String TRIM(String text){
+		if(text==null) return null;
+		return text.trim(); 
 	}	
 		
 	// ===================== UPPER function ===================== //
@@ -360,7 +454,7 @@ public final class TextFunctions {
 		if(text==null) return null;
 		return text.toUpperCase();
 	}
-
+	
 	// Internal private methods
 	private static boolean isDelimiter(char c){
 		return Character.isWhitespace(c) || Character.isSpaceChar(c);
