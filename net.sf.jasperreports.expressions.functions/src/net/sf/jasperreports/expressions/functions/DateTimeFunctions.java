@@ -18,6 +18,9 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.Days;
 import org.joda.time.LocalTime;
+import org.joda.time.Months;
+import org.joda.time.Weeks;
+import org.joda.time.Years;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -204,22 +207,6 @@ public final class DateTimeFunctions {
 		}
 	}
 	
-	// ===================== LASTDAY_OF_MONTH function ===================== //
-	@JRExprFunction(name="LASTDAY_OF_MONTH",description="Returns the last day of a month for a specified date object.")
-	@JRExprFunctionCategories({DATE_TIME})
-	@JRExprFunctionParameters({
-		@JRExprFunctionParameter(name="Date object",description="The object representing the date.")})
-	public static Integer LASTDAY_OF_MONTH(Object dateObject){
-		Date convertedDate = convertDateObject(dateObject);
-		if(convertedDate==null){
-			return null;
-		}
-		else{
-			DateTime dt=new DateTime(convertedDate);
-			return dt.dayOfMonth().withMaximumValue().getDayOfMonth();
-		}
-	}
-	
 	// ===================== EDATE function ===================== //
 	@JRExprFunction(name="EDATE",description="Returns a date a number of months away.")
 	@JRExprFunctionCategories({DATE_TIME})
@@ -317,6 +304,143 @@ public final class DateTimeFunctions {
 			DateTime dt1=new DateTime(startDateObj);
 			DateTime dt2=new DateTime(endDateObj);
 			return Days.daysBetween(dt1, dt2).getDays();
+		}
+	}
+	
+	// ===================== DAYSINMONTH function ===================== //
+	@JRExprFunction(name="DAYSINMONTH",description="Returns the number of days in a month.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Selected date",description="The date to check.")})
+	public static Integer DAYSINMONTH(Object dateObj){
+		Date date = convertDateObject(dateObj);
+		if(date==null){
+			return null;
+		}
+		else{
+			DateTime dt=new DateTime(date);
+			return dt.dayOfMonth().getMaximumValue();
+		}
+	}
+	
+	// ===================== DAYSINYEAR function ===================== //
+	@JRExprFunction(name="DAYSINYEAR",description="Returns the number of days in a year.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Selected date",description="The date to check.")})
+	public static Integer DAYSINYEAR(Object dateObj){
+		Date date = convertDateObject(dateObj);
+		if(date==null){
+			return null;
+		}
+		else{
+			DateTime dt=new DateTime(date);
+			return dt.dayOfYear().getMaximumValue();
+		}
+	}
+	
+	// ===================== WEEKS function ===================== //
+	@JRExprFunction(name="WEEKS",description="Returns the number of weeks between two dates.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Start date",description="The initial date."),
+		@JRExprFunctionParameter(name="End date",description="The end date.")})
+	public static Integer WEEKS(Object startDate, Object endDate){
+		Date startDateObj = convertDateObject(startDate);
+		Date endDateObj = convertDateObject(endDate);
+		if(startDateObj==null || endDateObj==null){
+			return null;
+		}
+		else{
+			DateTime dt1=new DateTime(startDateObj);
+			DateTime dt2=new DateTime(endDateObj);
+			return Weeks.weeksBetween(dt1, dt2).getWeeks();
+		}
+	}
+	
+	// ===================== WEEKSINYEAR function ===================== //
+	@JRExprFunction(name="WEEKSINYEAR",description="Returns the number of weeks in a year.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Selected date",description="The date to check.")})
+	public static Integer WEEKSINYEAR(Object dateObj){
+		Date date = convertDateObject(dateObj);
+		if(date==null){
+			return null;
+		}
+		else{
+			DateTime dt=new DateTime(date);
+			return dt.weekOfWeekyear().getMaximumValue();
+		}
+	}
+	
+	// ===================== WEEKNUM function ===================== //
+	@JRExprFunction(name="WEEKNUM",description="Returns the week number of a given date.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Selected date",description="The date to check.")})
+	public static Integer WEEKNUM(Object dateObj){
+		Date date = convertDateObject(dateObj);
+		if(date==null){
+			return null;
+		}
+		else{
+			DateTime dt=new DateTime(date);
+			return dt.getWeekOfWeekyear();
+		}
+	}
+	
+	// ===================== MONTHS function ===================== //
+	@JRExprFunction(name="MONTHS",description="Returns the number of months between two dates.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Start date",description="The initial date."),
+		@JRExprFunctionParameter(name="End date",description="The end date.")})
+	public static Integer MONTHS(Object startDate, Object endDate){
+		Date startDateObj = convertDateObject(startDate);
+		Date endDateObj = convertDateObject(endDate);
+		if(startDateObj==null || endDateObj==null){
+			return null;
+		}
+		else{
+			DateTime dt1=new DateTime(startDateObj);
+			DateTime dt2=new DateTime(endDateObj);
+			return Months.monthsBetween(dt1, dt2).getMonths();
+		}
+	}
+	
+	// ===================== YEARS function ===================== //
+	@JRExprFunction(name="YEARS",description="Returns the number of years between two dates.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Start date",description="The initial date."),
+		@JRExprFunctionParameter(name="End date",description="The end date.")})
+	public static Integer YEARS(Object startDate, Object endDate){
+		Date startDateObj = convertDateObject(startDate);
+		Date endDateObj = convertDateObject(endDate);
+		if(startDateObj==null || endDateObj==null){
+			return null;
+		}
+		else{
+			DateTime dt1=new DateTime(startDateObj);
+			DateTime dt2=new DateTime(endDateObj);
+			return Years.yearsBetween(dt1, dt2).getYears();
+		}
+	}
+	
+	// ===================== ISLEAPYEAR function ===================== //
+	@JRExprFunction(name="ISLEAPYEAR",description="Checks if the given date occurs in a leap year.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Selected date",description="The date to check.")})
+	public static Boolean ISLEAPYEAR(Object dateObj){
+		Date date = convertDateObject(dateObj);
+		if(date==null){
+			return null;
+		}
+		else{
+			DateTime dt=new DateTime(date);
+			return dt.year().isLeap();
 		}
 	}
 	

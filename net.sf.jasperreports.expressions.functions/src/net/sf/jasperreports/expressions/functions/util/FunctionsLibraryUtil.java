@@ -22,6 +22,7 @@ public class FunctionsLibraryUtil {
 	
 	private static Map<String, List<JRExprFunctionBean>> functionsByCategory=null;
 	private static List<JRExprFunctionBean> allFunctions=null;
+	private static List<String> libraryClassNames=null;
 
 	/**
 	 * Returns the list of built-in categories.
@@ -39,6 +40,7 @@ public class FunctionsLibraryUtil {
 		// Initialize support data structures
 		functionsByCategory=new HashMap<String, List<JRExprFunctionBean>>();
 		allFunctions=new ArrayList<JRExprFunctionBean>();
+		libraryClassNames=new ArrayList<String>();
 		
 		// Try to load the JR extensions
 		List<JRExprFunctions> extensionObjects = ExtensionsEnvironment.getExtensionsRegistry().getExtensions(JRExprFunctions.class);
@@ -49,6 +51,10 @@ public class FunctionsLibraryUtil {
 	
 		// Scan potential annotated classes for functions
 		for (Class<?> clazz : foundClasses){
+			String clazzName=clazz.getName();
+			if(!libraryClassNames.contains(clazzName)){
+				libraryClassNames.add(clazzName);
+			}
 			List<JRExprFunctionBean> jrFunctionsList = JRExprAnnotationsUtils.getJRFunctionsList(clazz);
 			for(JRExprFunctionBean f : jrFunctionsList){
 				for(String category : f.getCategories()){
@@ -98,6 +104,18 @@ public class FunctionsLibraryUtil {
 	}
 	
 	/**
+	 * Returns the list of classes that maintain the functions exposed by the library. 
+	 * 
+	 * @return the list of class names
+	 */
+	public static List<String> getLibraryClasses(){
+		if(libraryClassNames==null){
+			initLibrary();
+		}
+		return libraryClassNames;
+	}
+	
+	/**
 	 * Checks if it exists a function inside the library with the specified name.
 	 * 
 	 * @param functionName the function name
@@ -120,6 +138,8 @@ public class FunctionsLibraryUtil {
 		functionsByCategory=null;
 		allFunctions.clear();
 		allFunctions=null;
+		libraryClassNames.clear();
+		libraryClassNames=null;
 		initLibrary();
 	}
 }
