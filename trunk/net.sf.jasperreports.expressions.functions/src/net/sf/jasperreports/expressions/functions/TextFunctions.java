@@ -268,7 +268,7 @@ public final class TextFunctions {
 	@JRExprFunctionCategories({TEXT})
 	@JRExprFunctionParameters({
 			@JRExprFunctionParameter(name="Text",description="The input text.")})
-	public static String PROPER(String text, Integer startPosition, Integer charactersNum){
+	public static String PROPER(String text){
 		if(text==null) return null;
 		String lowerCaseString=LOWER(text);
 		StringBuffer result=new StringBuffer();
