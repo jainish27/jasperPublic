@@ -48,6 +48,8 @@ public final class LogicalFunctions {
 	// ===================== NOT function ===================== //
 	@JRExprFunction(name="NOT",description="Returns the negation of the specified boolean expression.")
 	@JRExprFunctionCategories({LOGICAL})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Argument",description="A boolean expression or value.")})
 	public static Boolean NOT(Boolean boolValue){
 		if (boolValue==null){
 			return null;
