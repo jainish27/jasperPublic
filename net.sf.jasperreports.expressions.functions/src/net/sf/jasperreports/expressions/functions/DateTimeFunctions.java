@@ -2,7 +2,6 @@ package net.sf.jasperreports.expressions.functions;
 
 import static net.sf.jasperreports.expressions.functions.CategoryKeys.DATE_TIME;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -34,30 +33,17 @@ import org.joda.time.format.DateTimeFormatter;
 public final class DateTimeFunctions {
 	
 	// ===================== TODAY function ===================== //
-	@JRExprFunction(name="TODAY",description="Returns the current date as text string. A compact format is used.")
+	@JRExprFunction(name="TODAY",description="Returns the current date as date object.")
 	@JRExprFunctionCategories({DATE_TIME})
-	public static String TODAY(){
-		return SimpleDateFormat.getDateInstance(DateFormat.SHORT).format(new Date());
+	public static Date TODAY(){
+		return new Date();
 	}
 	
 	// ===================== NOW function ===================== //
-	@JRExprFunction(name="NOW",description="Returns the current date and time as text string. " +
-			"If no format pattern is specified a short one is used.")
+	@JRExprFunction(name="NOW",description="Returns the current instant as date object.")
 	@JRExprFunctionCategories({DATE_TIME})
-	@JRExprFunctionParameters({
-		@JRExprFunctionParameter(name="Format pattern",description="The text string representing the format pattern for the date (and time).")})
-	public static String NOW(){
-		return NOW(null);
-	}
-	
-	public static String NOW(String pattern){
-		if(pattern==null) {
-			return SimpleDateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date());
-		}
-		else{
-			SimpleDateFormat dateFormatter=new SimpleDateFormat(pattern);
-			return dateFormatter.format(new Date());
-		}
+	public static Date NOW(){
+		return new Date();
 	}
 	
 	// ===================== YEAR function ===================== //
@@ -443,6 +429,24 @@ public final class DateTimeFunctions {
 			return dt.year().isLeap();
 		}
 	}
+	
+	// ===================== FORMAT function ===================== //
+	@JRExprFunction(name="DATEFORMAT",description="Format the specified date object using the chosen format pattern")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Selected date",description="The date to format."),
+		@JRExprFunctionParameter(name="Format pattern",description="Format pattern to apply when printing the date.")})
+	public static String DATEFORMAT(Date dateObj, String formatPattern){
+		if(dateObj==null){
+			return null;
+		}
+		else{
+			DateTimeFormatter formatter = DateTimeFormat.forPattern(formatPattern);
+			DateTime dt = new DateTime(dateObj);
+			return dt.toString(formatter);
+		}
+	}
+	
 	
 	/* Internal private methods */
 	

@@ -88,4 +88,19 @@ public final class LogicalFunctions {
 		return test ? value1 : value2; 
 	}
 	
+	// ===================== EQUALS function ===================== //
+	@JRExprFunction(name="EQUALS",description="Checks if the two specified objects are equals.")
+	@JRExprFunctionCategories({LOGICAL})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Object 1",description="The first element to be compared."),
+		@JRExprFunctionParameter(name="Object 2",description="The second element to be compared.")})
+	public static Boolean EQUALS(Object obj1, Object obj2){
+		if(obj1!=null){
+			return obj1.equals(obj2);
+		}
+		else if (obj2!=null){
+			return obj2.equals(obj1);
+		}
+		return true;	// both null
+	}	
 }
