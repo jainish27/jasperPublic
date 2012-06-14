@@ -1,0 +1,42 @@
+<project name="JasperReports Expressions Functions" default="packageJar" basedir=".">
+	<description>Provides a packaged jar for the JasperReports Expressions functions library</description>
+	<property name="version" value="0.0.1"/>
+	
+	<target name="compile" description="Compiles the java source files of the library.">
+		<delete dir="./build"/>
+		<mkdir dir="./build/classes"/> 
+		<javac destdir="./build/classes" debug="true" optimize="false" deprecation="true" target="1.6" source="1.6" encoding="ISO-8859-1" includeantruntime="false">
+			<classpath>
+				<pathelement location="./build/classes"/>
+				<fileset dir="./lib">
+					<!-- 
+						Be sure to have in the lib folder:
+						 - the lastest jasperreports jar file (i.e: jasperreports-4.6.0.jar)
+						 - joda time library jar file (i.e: joda-time-2.1.jar)
+						 - the JasperReports Expression jar file (i.e: jasperreports-expressions-0.0.1.jar)	 
+					 -->
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<src path="./src"/>
+		</javac>
+
+		<copy todir="./build/classes">
+			<fileset dir="./src">
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="packageJar" depends="compile" description="Builds the JasperReports Expressions Functions JAR file.">
+		<delete dir="./dist" />
+		<mkdir dir="./dist"/> 
+		<jar jarfile="./dist/jasperreports-exprfunctions-${version}.jar" manifest="META-INF/MANIFEST.MF">
+			<fileset dir="./build/classes"/>
+			<fileset dir="./">
+				<include name="**/license.txt"/>
+			</fileset>
+		</jar>
+	</target>
+	
+</project>
