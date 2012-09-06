@@ -31,7 +31,7 @@ public final class JRExprAnnotationsUtils {
 		
 		List<JRExprFunctionBean> functionsList=new ArrayList<JRExprFunctionBean>();
 		for (String functionName : methodsCache.keySet()){
-			JRExprFunctionBean jrFunction = createJRFunction(methodsCache.get(functionName));
+			JRExprFunctionBean jrFunction = createJRFunction(methodsCache.get(functionName),clazz.getCanonicalName());
 			functionsList.add(jrFunction);
 		}
 		
@@ -41,9 +41,8 @@ public final class JRExprAnnotationsUtils {
 	/*
 	 * Creates a bean used to represent a "function".
 	 */
-	private static JRExprFunctionBean createJRFunction(List<Method> methods) {
-		
-		JRExprFunctionBean funct=new JRExprFunctionBean();
+	private static JRExprFunctionBean createJRFunction(List<Method> methods, String functionClassName) {
+		JRExprFunctionBean funct=new JRExprFunctionBean(functionClassName);
 		// The first instance is the one annotated with @JRFunction
 		// that maintains all the necessary infos to prepare the skeleton of the function bean
 		Method first = methods.get(0);
