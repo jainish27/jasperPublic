@@ -18,7 +18,11 @@ public class JRExprFunctionBean implements Comparable<JRExprFunctionBean>{
 	private List<JRExprFunctionParameterBean> parameters;
 	private Class<?> returnType;
 	private List<String> categories;
+	private String functionClassName;
 	
+	public JRExprFunctionBean(String functionClassName) {
+		this.functionClassName=functionClassName;
+	}
 	public String getName() {
 		return name;
 	}
@@ -61,8 +65,12 @@ public class JRExprFunctionBean implements Comparable<JRExprFunctionBean>{
 	public void setCategories(List<String> categories) {
 		this.categories = categories;
 	}
+	public String getFunctionClassName() {
+		return functionClassName;
+	}
 	@Override
 	public int compareTo(JRExprFunctionBean o) {
 		return name.compareTo(o.getName());
 	}
+	
 }
