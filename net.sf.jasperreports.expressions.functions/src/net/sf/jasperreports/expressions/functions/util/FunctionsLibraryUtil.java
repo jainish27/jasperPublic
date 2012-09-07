@@ -26,9 +26,8 @@ public class FunctionsLibraryUtil {
 	private static List<String> libraryClassNames=null;
 	
 	// Prefix and suffix support data
-	private static String[] PREFIX_STRINGS=new String[]{" ","(","\t","+","-","/","*","!","|","[","{"};
+	private static String[] PREFIX_STRINGS=new String[]{"(","+","-","/","*","!","&","|","[","{"};
 	private static String[] WRONG_PREFIX_STRING=new String[]{"$P{","$F{","$V{","$X{"};
-	private static String[] SUFFIX_STRINGS=new String[]{" ","\t","("};
 
 	/**
 	 * Returns the list of built-in categories.
@@ -145,9 +144,11 @@ public class FunctionsLibraryUtil {
 	 * <code>[c1]&lt;MY_FUNCTION&gt;[c2]</code>
 	 * <br/>
 	 * Possible values for <code>[c1]</code> are the following:
-	 * 	whitespace,(,),tab,+,-,/,*,!,=,&,|,[,{,"<br/
+	 * 	(,+,-,/,*,!,=,&,|,[,{,"<br/>
 	 * Possible values for <code>[c2]</code> are the following:
-	 * 	whitespace,( <br/>
+	 * 	( <br/>
+	 * Whitespace and tabulation chars are allowed to separate 
+	 * the function name and c1 or c2 chars.
 	 * 
 	 * @param jre the expression that need to be checked
 	 * @return a list of possible functions used in the expression, an empty list otherwise
@@ -187,6 +188,9 @@ public class FunctionsLibraryUtil {
 	private static boolean checkPossibleFunctionPrefix(String prefix) {
 		if(prefix.isEmpty()) return true;
 		boolean prefixOk=false;
+		// Get rid of the tab and remove trim the string
+		prefix=prefix.replace('\t', ' ').trim();
+		// Stop if some wrong prefix is found
 		for (String s : WRONG_PREFIX_STRING){
 			if(prefix.endsWith(s)){
 				return false;
@@ -205,10 +209,12 @@ public class FunctionsLibraryUtil {
 	 * Checks if the possible function found has a valid suffix.
 	 */
 	private static boolean checkPossibleFunctionSuffix(String suffix) {
-		for (String s : SUFFIX_STRINGS){
-			if(suffix.startsWith(s)){
-				return true;
-			}
+		// Ignore all characters spaces and be sure the first
+		// char found is the only valid one '('
+		for (int i=0;i<suffix.length();i++){
+			char readchar = suffix.charAt(i);
+			if(readchar=='(') return true;
+			if(!(readchar==' ' || readchar=='\t')) return false;
 		}
 		return false;
 	}
