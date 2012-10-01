@@ -7,7 +7,7 @@ Implementation-Title: net.sf.jasperreports.expressions.functions
 Implementation-Version: 0.0.1
 Implementation-Vendor: Jaspersoft Corporation
 Bundle-Name: JasperReports Expressions Functions Library
-Bundle-Version: 0.0.1
+Bundle-Version: 0.0.3
 Bundle-Vendor: Jaspersoft Corporation
 Bundle-SymbolicName: net.sf.jasperreports.expressions.functions
 Bundle-ClassPath: .
