@@ -7,7 +7,7 @@ Implementation-Title: net.sf.jasperreports.expressions
 Implementation-Version: 0.0.1
 Implementation-Vendor: Jaspersoft Corporation
 Bundle-Name: JasperReports Expressions
-Bundle-Version: 0.0.1
+Bundle-Version: 0.0.3
 Bundle-Vendor: Jaspersoft Corporation
 Bundle-SymbolicName: net.sf.jasperreports.expressions
 Bundle-ClassPath: .

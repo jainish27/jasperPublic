@@ -1,6 +1,6 @@
 <project name="JasperReports Expressions Functions" default="packageJar" basedir=".">
 	<description>Provides a packaged jar for the JasperReports Expressions functions library</description>
-	<property name="version" value="0.0.2"/>
+	<property name="version" value="0.0.3"/>
 	
 	<target name="compile" description="Compiles the java source files of the library.">
 		<delete dir="./build"/>
