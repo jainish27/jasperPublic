@@ -206,7 +206,7 @@ public final class DateTimeFunctions {
 		}
 		else{
 			DateTime dt=new DateTime(convertedDate);
-			dt.plusMonths(months);
+			dt = dt.plusMonths(months);
 			return dt.toDate();
 		}
 	}
@@ -233,7 +233,7 @@ public final class DateTimeFunctions {
 					// Decrement remaining days only when it is not Saturday or Sunday
 					remainingDays--;
 				}
-				cursorDT.plusDays(1);
+				cursorDT=cursorDT.plusDays(1);
 			}
 			return cursorDT.toDate();
 		}
@@ -268,7 +268,7 @@ public final class DateTimeFunctions {
 						dayOfWeek==DateTimeConstants.SUNDAY)){
 					workingDays++;
 				}
-				cursorDateTime.plusDays(1);
+				cursorDateTime=cursorDateTime.plusDays(1);
 			}
 			return workingDays;
 		}
