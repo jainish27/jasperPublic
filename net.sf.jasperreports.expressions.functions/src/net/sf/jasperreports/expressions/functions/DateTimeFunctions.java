@@ -82,7 +82,7 @@ public final class DateTimeFunctions {
 	@JRExprFunctionCategories({DATE_TIME})
 	@JRExprFunctionParameters({
 		@JRExprFunctionParameter(name="Date object",description="The object representing the date."),
-		@JRExprFunctionParameter(name="Sunday is first day",description="Boolean flag to decide if sunday should be considered as first day" +
+		@JRExprFunctionParameter(name="Sunday is first day",description="Boolean flag to decide if Sunday should be considered as first day." +
 				"Default is not.")})
 	public static Integer WEEKDAY(Object dateObject){
 		return WEEKDAY(dateObject, false);
