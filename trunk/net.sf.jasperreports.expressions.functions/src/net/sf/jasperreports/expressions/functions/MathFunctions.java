@@ -170,6 +170,97 @@ public final class MathFunctions {
 		return result;
 	}
 	
+	// ===================== MIN function ===================== //
+	@JRExprFunction(name="MIN",description="Returns the minimum of a list of numeric values.")
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Number",description="Number to compare")})
+	@JRExprFunctionCategories({MATH})
+	public static Number MIN(Number ...numbers){
+		if(numbers.length==0) throw new IllegalArgumentException("No numbers have been specified");
+		if(!isNumberListValid(numbers)) throw new IllegalArgumentException("No null element are allowed");
+		double min= numbers[0].doubleValue();
+		for (int i=1;i<numbers.length;i++){
+			if(numbers[i].doubleValue()<min){
+				min = numbers[i].doubleValue();
+			}
+		}
+		return fixNumberReturnType(min, numbers);
+	}	
+	
+	// ===================== MAX function ===================== //
+	@JRExprFunction(name="MAX",description="Returns the maximum of a list of numeric values.")
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Number",description="Number to compare")})
+	@JRExprFunctionCategories({MATH})
+	public static Number MAX(Number ...numbers){
+		if(numbers.length==0) throw new IllegalArgumentException("No numbers have been specified");
+		if(!isNumberListValid(numbers)) throw new IllegalArgumentException("No null element are allowed");
+		double max= numbers[0].doubleValue();
+		for (int i=1;i<numbers.length;i++){
+			if(numbers[i].doubleValue()>max){
+				max = numbers[i].doubleValue();
+			}
+		}
+		return fixNumberReturnType(max, numbers);
+	}
+	
+	// ===================== FLOOR function ===================== //
+	@JRExprFunction(name="FLOOR",description="" +
+			"Returns the largest (closest to positive infinity) double value that is less " +
+			"than or equal to the argument and is equal to a mathematical integer")
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Number",description="Value")})
+	@JRExprFunctionCategories({MATH})
+	public static Double FLOOR(Number number){
+		if(number == null) throw new IllegalArgumentException("The value number can not be null");
+		return Math.floor(number.doubleValue());
+	}
+
+	// ===================== CEIL function ===================== //
+	@JRExprFunction(name="CEIL",description="" +
+			"Returns the smallest (closest to negative infinity) double value that is greater " +
+			"than or equal to the argument and is equal to a mathematical integer")
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Number",description="Value")})
+	@JRExprFunctionCategories({MATH})
+	public static Double CEIL(Number number){
+		if(number == null) throw new IllegalArgumentException("The value number can not be null");
+		return Math.ceil(number.doubleValue());
+	}
+	
+	/*
+	 * Checks if the array of numbers is valid. 
+	 * No null element must be contained.
+	 */
+	private static boolean isNumberListValid(Number ...numbers){
+		for(int i=0;i<numbers.length;i++){
+			if(numbers[i]==null) return false;
+		}
+		return true;
+	}
+	
+	/*
+	 * Fixes the return type for the numeric result value.
+	 */
+	private static Number fixNumberReturnType(Number returnValue, Number ...numbers){
+		if(haveSameType(Integer.class, numbers)) return returnValue.intValue();
+		if(haveSameType(Long.class, numbers)) return returnValue.intValue();
+		if(haveSameType(Float.class, numbers)) return returnValue.intValue();
+		return returnValue.doubleValue();
+	}
+	
+	/*
+	 * Checks if the list of generic numbers have all the same type.
+	 */
+	private static boolean haveSameType(
+			Class<? extends Number> clazz, Number ...numbers){
+		for(int i=0; i<numbers.length; i++){
+			if(numbers[i].getClass() != clazz){
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	
 }
