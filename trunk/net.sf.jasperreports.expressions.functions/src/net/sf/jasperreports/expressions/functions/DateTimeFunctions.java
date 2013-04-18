@@ -12,6 +12,8 @@ import net.sf.jasperreports.expressions.annotations.JRExprFunction;
 import net.sf.jasperreports.expressions.annotations.JRExprFunctionCategories;
 import net.sf.jasperreports.expressions.annotations.JRExprFunctionParameter;
 import net.sf.jasperreports.expressions.annotations.JRExprFunctionParameters;
+import net.sf.jasperreports.types.date.DateRange;
+import net.sf.jasperreports.types.date.DateRangeBuilder;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
@@ -447,6 +449,26 @@ public final class DateTimeFunctions {
 		}
 	}
 	
+	// ===================== DATERANGE function ===================== //
+	@JRExprFunction(name="DATERANGE",description="Allows to create a JasperReports DateRange instance " +
+			"starting from either a String expression or a Date instance.")
+	@JRExprFunctionCategories({DATE_TIME})
+	@JRExprFunctionParameters({
+		@JRExprFunctionParameter(name="Date Range Details",description="The date range information.")})
+	public static DateRange DATERANGE(Object dateExprObj){
+		DateRangeBuilder dateRangeBuilder = null;
+		if(dateExprObj instanceof String){
+			dateRangeBuilder = new DateRangeBuilder((String)dateExprObj);
+		}
+		else if(dateExprObj instanceof Date) {
+			dateRangeBuilder = new DateRangeBuilder((Date)dateExprObj);
+		}
+		else {
+			throw new IllegalArgumentException(
+					"The input parameter for DATERANGE function can be only a String or a Date object");
+		}
+		return dateRangeBuilder.toDateRange();
+	}
 	
 	/* Internal private methods */
 	
