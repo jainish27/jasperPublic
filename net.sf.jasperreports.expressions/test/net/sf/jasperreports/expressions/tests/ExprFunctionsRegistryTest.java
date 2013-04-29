@@ -9,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.jasperreports.expressions.JRExprFunctions;
 import net.sf.jasperreports.extensions.ExtensionsEnvironment;
+import net.sf.jasperreports.functions.FunctionsBundle;
 
 import org.junit.Test;
 
@@ -24,13 +24,13 @@ public class ExprFunctionsRegistryTest {
 	@Test
 	public void test() {
 		
-		List<JRExprFunctions> functions = ExtensionsEnvironment.getExtensionsRegistry().getExtensions(JRExprFunctions.class);
+		List<FunctionsBundle> functions = ExtensionsEnvironment.getExtensionsRegistry().getExtensions(FunctionsBundle.class);
 		
 		List<Class<?>> foundClasses = new ArrayList<Class<?>>();
 		
-		for (JRExprFunctions f : functions)
+		for (FunctionsBundle f : functions)
 		{
-			foundClasses.addAll(f.getFunctionsClasses());
+			foundClasses.addAll(f.getFunctionClasses());
 		}
 		
 		assertTrue(foundClasses.size() == 2);
