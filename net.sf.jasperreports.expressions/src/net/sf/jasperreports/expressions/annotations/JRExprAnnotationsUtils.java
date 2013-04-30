@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.jasperreports.functions.annotations.Function;
+import net.sf.jasperreports.functions.annotations.FunctionCategories;
+import net.sf.jasperreports.functions.annotations.FunctionParameter;
+import net.sf.jasperreports.functions.annotations.FunctionParameters;
+
 /**
  * Support class that works with the annotated Class(es).
  * 
@@ -40,21 +45,37 @@ public final class JRExprAnnotationsUtils {
 
 	/*
 	 * Creates a bean used to represent a "function".
+	 * 
 	 */
+	@SuppressWarnings("deprecation")
 	private static JRExprFunctionBean createJRFunction(List<Method> methods, String functionClassName) {
 		JRExprFunctionBean funct=new JRExprFunctionBean(functionClassName);
 		// The first instance is the one annotated with @JRFunction
 		// that maintains all the necessary infos to prepare the skeleton of the function bean
 		Method first = methods.get(0);
 		JRExprFunction functionAnnotation = first.getAnnotation(JRExprFunction.class);
+		Function newFunctionAnnotation = first.getAnnotation(Function.class);
 		funct.setName(first.getName());
-		funct.setDisplayName(functionAnnotation.name());
-		funct.setDescription(functionAnnotation.description());
+		funct.setDisplayName(newFunctionAnnotation == null ? functionAnnotation.name() : newFunctionAnnotation.name());
+		funct.setDescription(newFunctionAnnotation == null ? functionAnnotation.description() : newFunctionAnnotation.description());
 		funct.setReturnType(first.getReturnType());
-		JRExprFunctionCategories functionCategoriesAnnotation=first.getAnnotation(JRExprFunctionCategories.class);
-		funct.getCategories().addAll(Arrays.asList(functionCategoriesAnnotation.value()));
+		JRExprFunctionCategories functionCategoriesAnnotation = first.getAnnotation(JRExprFunctionCategories.class);
+		FunctionCategories newFunctionCategoriesAnnotation = first.getAnnotation(FunctionCategories.class);
+		funct.getCategories().addAll(Arrays.asList(newFunctionAnnotation == null ? functionCategoriesAnnotation.value() : newFunctionCategoriesAnnotation.value()));
 		JRExprFunctionParameters parametersAnnotation = first.getAnnotation(JRExprFunctionParameters.class);
-		if(parametersAnnotation!=null){
+		FunctionParameters newParametersAnnotation = first.getAnnotation(FunctionParameters.class);
+		if(newParametersAnnotation != null)
+		{
+			for(FunctionParameter param : newParametersAnnotation.value()){
+				// Get basic info from the annotation
+				JRExprFunctionParameterBean paramDescriptor=new JRExprFunctionParameterBean();
+				paramDescriptor.setName(param.name());
+				paramDescriptor.setDescription(param.description());
+				funct.getParameters().add(paramDescriptor);
+			}
+		}
+		else if(parametersAnnotation != null)
+		{
 			for(JRExprFunctionParameter param : parametersAnnotation.value()){
 				// Get basic info from the annotation
 				JRExprFunctionParameterBean paramDescriptor=new JRExprFunctionParameterBean();
@@ -93,6 +114,7 @@ public final class JRExprAnnotationsUtils {
 	 * Creates a support map that maintain for each method name (name as key) 
 	 * a list of Methods found in the Class.
 	 */
+	@SuppressWarnings("deprecation")
 	private static Map<String,List<Method>> buildAnnotatedMethodsCache(Class<?> clazz) {
 		Map<String,List<Method>> methodsByNameMap=new HashMap<String, List<Method>>();
 				
@@ -100,7 +122,9 @@ public final class JRExprAnnotationsUtils {
 		// in order to have a list of what will be the functions
 		for (Method m : clazz.getMethods()){
 			JRExprFunction jrFunctionAnn = m.getAnnotation(JRExprFunction.class);
-			if(jrFunctionAnn!=null){
+			Function jrNewFunctionAnn = m.getAnnotation(Function.class);
+			if (jrNewFunctionAnn != null || jrFunctionAnn != null)
+			{
 				String methodName = m.getName();
 				List<Method> methods=methodsByNameMap.get(methodName);
 				if(methods==null){
@@ -115,7 +139,9 @@ public final class JRExprAnnotationsUtils {
 		// name but a different list of parameters
 		for (Method m : clazz.getMethods()){
 			JRExprFunction jrFunctionAnn = m.getAnnotation(JRExprFunction.class);
-			if(jrFunctionAnn==null){
+			Function jrNewFunctionAnn = m.getAnnotation(Function.class);
+			if (jrNewFunctionAnn == null || jrFunctionAnn == null)
+			{
 				String methodName = m.getName();
 				List<Method> methods=methodsByNameMap.get(methodName);
 				if (methods!=null){
