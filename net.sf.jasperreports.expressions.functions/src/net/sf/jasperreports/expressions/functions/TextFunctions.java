@@ -93,7 +93,7 @@ public final class TextFunctions {
 	@JRExprFunctionCategories({TEXT})
 	@JRExprFunctionParameters({
 			@JRExprFunctionParameter(name="Text",description="The string containing the character to convert.")})
-	public static String CODE(String ...strings){
+	public static String CONCATENATE(String ...strings){
 		if(strings.length==0) return null;
 		StringBuffer sb=new StringBuffer();
 		for (int i=0;i<strings.length;i++){
