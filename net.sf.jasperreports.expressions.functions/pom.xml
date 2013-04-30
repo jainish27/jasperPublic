@@ -40,10 +40,6 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Export-Package>
-							net.sf.jasperreports.expressions.fuctions,
-							net.sf.jasperreports.expressions.functions.errors
-						</Export-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
 					</instructions>
 				</configuration>
