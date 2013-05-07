@@ -2,13 +2,18 @@ package net.sf.jasperreports.expressions.annotations;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.util.MessageUtil;
 import net.sf.jasperreports.functions.annotations.Function;
 import net.sf.jasperreports.functions.annotations.FunctionCategories;
+import net.sf.jasperreports.functions.annotations.FunctionCategory;
+import net.sf.jasperreports.functions.annotations.FunctionMessagesBundle;
 import net.sf.jasperreports.functions.annotations.FunctionParameter;
 import net.sf.jasperreports.functions.annotations.FunctionParameters;
 
@@ -18,69 +23,196 @@ import net.sf.jasperreports.functions.annotations.FunctionParameters;
  * @author Massimo Rabbi (mrabbi@users.sourceforge.net)
  *
  */
-public final class JRExprAnnotationsUtils {
+public final class JRExprAnnotationsUtils 
+{
 
+	private final JasperReportsContext jasperReportsContext;
+	private final MessageUtil messageUtil;
+
+	private JRExprAnnotationsUtils(JasperReportsContext jasperReportsContext)
+	{
+		this.jasperReportsContext = jasperReportsContext;
+		this.messageUtil = MessageUtil.getInstance(jasperReportsContext);
+	}
+	
+	
 	/**
-	 * Retrieves the list of functions contributed in the specified class reference.
-	 * 
-	 * <p>
-	 * The method seeks for annotated methods with the annotation {@link JRExprFunction} 
-	 * in order to build the basic set of functions, and then scan for similar ones to
-	 * decide which parameters are mandatory and which optional. 
-	 * 
-	 * @param clazz the class reference that is supposed to contain expression functions
-	 * @return a list of JR expression functions
+	 *
 	 */
-	public static List<JRExprFunctionBean> getJRFunctionsList(Class<?> clazz){
-		Map<String, List<Method>> methodsCache = buildAnnotatedMethodsCache(clazz);
-		
-		List<JRExprFunctionBean> functionsList=new ArrayList<JRExprFunctionBean>();
-		for (String functionName : methodsCache.keySet()){
-			JRExprFunctionBean jrFunction = createJRFunction(methodsCache.get(functionName),clazz.getCanonicalName());
-			functionsList.add(jrFunction);
-		}
-		
-		return functionsList;
+	public static JRExprAnnotationsUtils getInstance(JasperReportsContext jasperReportsContext)
+	{
+		return new JRExprAnnotationsUtils(jasperReportsContext);
+	}
+	
+	
+	/**
+	 * @deprecated Replaced by {@link #getFunctionsList(Class)}.
+	 */
+	public static List<JRExprFunctionBean> getJRFunctionsList(Class<?> clazz)
+	{
+		return getInstance(DefaultJasperReportsContext.getInstance()).getFunctionsList(clazz);
 	}
 
-	/*
-	 * Creates a bean used to represent a "function".
+	/**
 	 * 
 	 */
 	@SuppressWarnings("deprecation")
-	private static JRExprFunctionBean createJRFunction(List<Method> methods, String functionClassName) {
-		JRExprFunctionBean funct=new JRExprFunctionBean(functionClassName);
+	private JRExprFunctionBean createJRFunction(List<Method> methods, Class<?> clazz) 
+	{
+		JRExprFunctionBean funct = new JRExprFunctionBean(clazz.getCanonicalName());
 		// The first instance is the one annotated with @JRFunction
 		// that maintains all the necessary infos to prepare the skeleton of the function bean
 		Method first = methods.get(0);
-		JRExprFunction functionAnnotation = first.getAnnotation(JRExprFunction.class);
-		Function newFunctionAnnotation = first.getAnnotation(Function.class);
-		funct.setName(first.getName());
-		funct.setDisplayName(newFunctionAnnotation == null ? functionAnnotation.name() : newFunctionAnnotation.name());
-		funct.setDescription(newFunctionAnnotation == null ? functionAnnotation.description() : newFunctionAnnotation.description());
+		funct.setId(first.getName());
 		funct.setReturnType(first.getReturnType());
-		JRExprFunctionCategories functionCategoriesAnnotation = first.getAnnotation(JRExprFunctionCategories.class);
-		FunctionCategories newFunctionCategoriesAnnotation = first.getAnnotation(FunctionCategories.class);
-		funct.getCategories().addAll(Arrays.asList(newFunctionAnnotation == null ? functionCategoriesAnnotation.value() : newFunctionCategoriesAnnotation.value()));
-		JRExprFunctionParameters parametersAnnotation = first.getAnnotation(JRExprFunctionParameters.class);
-		FunctionParameters newParametersAnnotation = first.getAnnotation(FunctionParameters.class);
-		if(newParametersAnnotation != null)
+
+		String functionMessBundle = clazz.getPackage().getName() + ".jasperreports_messages";//FIXMEFUNCT use constant
+		FunctionMessagesBundle functionMessBundleAnn = first.getAnnotation(FunctionMessagesBundle.class);
+		if (functionMessBundleAnn == null)
 		{
-			for(FunctionParameter param : newParametersAnnotation.value()){
-				// Get basic info from the annotation
-				JRExprFunctionParameterBean paramDescriptor=new JRExprFunctionParameterBean();
-				paramDescriptor.setName(param.name());
-				paramDescriptor.setDescription(param.description());
-				funct.getParameters().add(paramDescriptor);
+			functionMessBundleAnn = clazz.getAnnotation(FunctionMessagesBundle.class);
+		}
+		if (functionMessBundleAnn != null)
+		{
+			functionMessBundle = functionMessBundleAnn.value();
+		}
+
+		String functionName = null;
+		String functionDescription = null;
+		
+		Function newFunctionAnnotation = first.getAnnotation(Function.class);
+		if (newFunctionAnnotation == null)
+		{
+			JRExprFunction functionAnnotation = first.getAnnotation(JRExprFunction.class);
+			functionName = functionAnnotation.name();
+			functionDescription = functionAnnotation.description();
+		}
+		else
+		{
+			functionName = newFunctionAnnotation.value();
+			
+			String name = messageUtil.getMessageProvider(functionMessBundle).getMessage(clazz.getName() + "." + funct.getId() + ".name", null, Locale.getDefault());//FIXMEFUNCT provide locale
+			if (name != null)
+			{
+				functionName = name;
+			}
+			String description = messageUtil.getMessageProvider(functionMessBundle).getMessage(clazz.getName() + "." + funct.getId() + ".description", null, Locale.getDefault());//FIXMEFUNCT provide locale
+			if (description != null)
+			{
+				functionDescription = description;
 			}
 		}
-		else if(parametersAnnotation != null)
+
+		funct.setName(functionName);
+		funct.setDescription(functionDescription);
+		
+		JRExprFunctionCategories functionCategoriesAnnotation = first.getAnnotation(JRExprFunctionCategories.class);
+		if (functionCategoriesAnnotation == null)
 		{
-			for(JRExprFunctionParameter param : parametersAnnotation.value()){
+			FunctionCategories newFunctionCategoriesAnnotation = first.getAnnotation(FunctionCategories.class);
+			
+			if (newFunctionCategoriesAnnotation == null)
+			{
+				newFunctionCategoriesAnnotation = clazz.getAnnotation(FunctionCategories.class);
+			}
+			
+			if (newFunctionCategoriesAnnotation != null)
+			{
+				Class<?>[] categories = newFunctionCategoriesAnnotation.value();
+				for (Class<?> categoryClass : categories)
+				{
+					String categoryId = categoryClass.getName();
+					String categoryName = null;
+					String categoryDescription = null;
+
+					FunctionCategory functionCategory = categoryClass.getAnnotation(FunctionCategory.class);
+					if (functionCategory != null) 
+					{
+						String id = functionCategory.value();
+						if (id != null && id.trim().length() > 0)
+						{
+							categoryId = id;
+						}
+						categoryName = functionCategory.value();
+					}
+					
+					String categoryMessBundle = categoryClass.getPackage().getName() + ".jasperreports_messages";//FIXMEFUNCT use constant
+					FunctionMessagesBundle categMessBundleAnn = categoryClass.getAnnotation(FunctionMessagesBundle.class);
+					if (categMessBundleAnn != null)
+					{
+						categoryMessBundle = categMessBundleAnn.value();
+					}
+
+					String name = messageUtil.getMessageProvider(categoryMessBundle).getMessage(categoryId + ".name", null, Locale.getDefault());//FIXMEFUNCT provide locale and optimize by getting localized provider everywhere
+					if (name != null)
+					{
+						categoryName = name;
+					}
+					String description = messageUtil.getMessageProvider(categoryMessBundle).getMessage(categoryId + ".description", null, Locale.getDefault());//FIXMEFUNCT provide locale
+					if (description != null)
+					{
+						categoryDescription = description;
+					}
+					
+					JRExprFunctionCategoryBean categDescriptor = new JRExprFunctionCategoryBean();
+					categDescriptor.setId(categoryId);
+					categDescriptor.setName(categoryName);
+					categDescriptor.setDescription(categoryDescription);
+					funct.getCategories().add(categDescriptor);
+				}
+			}
+		}
+		else
+		{
+			for (String category : functionCategoriesAnnotation.value())
+			{
+				JRExprFunctionCategoryBean categDescriptor = new JRExprFunctionCategoryBean();
+				categDescriptor.setId(category);
+				categDescriptor.setName(messageUtil.getMessageProvider("MessagesBundle").getMessage("Category." + category + ".display", null, Locale.getDefault()));
+				categDescriptor.setDescription(messageUtil.getMessageProvider("MessagesBundle").getMessage("Category." + category + ".description", null, Locale.getDefault()));
+				funct.getCategories().add(categDescriptor);
+			}
+		}
+		
+		FunctionParameters newParametersAnnotation = first.getAnnotation(FunctionParameters.class);
+		if(newParametersAnnotation == null)
+		{
+			JRExprFunctionParameters parametersAnnotation = first.getAnnotation(JRExprFunctionParameters.class);
+			if(parametersAnnotation != null)
+			{
+				for(JRExprFunctionParameter param : parametersAnnotation.value()){
+					// Get basic info from the annotation
+					JRExprFunctionParameterBean paramDescriptor=new JRExprFunctionParameterBean();
+					paramDescriptor.setName(param.name());
+					paramDescriptor.setDescription(param.description());
+					funct.getParameters().add(paramDescriptor);
+				}
+			}
+		}
+		else
+		{
+			for(FunctionParameter param : newParametersAnnotation.value())
+			{
 				// Get basic info from the annotation
-				JRExprFunctionParameterBean paramDescriptor=new JRExprFunctionParameterBean();
-				paramDescriptor.setName(param.name());
-				paramDescriptor.setDescription(param.description());
+				JRExprFunctionParameterBean paramDescriptor = new JRExprFunctionParameterBean();
+				String parameterId = param.value();
+				String parameterName = null;
+				String parameterDescription = null;
+				if (parameterId != null && parameterId.trim().length() > 0)
+				{
+					String name = messageUtil.getMessageProvider(functionMessBundle).getMessage(clazz.getName() + "." + funct.getId() + "." + parameterId + ".name", null, Locale.getDefault());//FIXMEFUNCT provide locale
+					if (name != null)
+					{
+						parameterName = name;
+					}
+					String description = messageUtil.getMessageProvider(functionMessBundle).getMessage(clazz.getName() + "." + funct.getId() + "." + parameterId + ".description", null, Locale.getDefault());//FIXMEFUNCT provide locale
+					if (description != null)
+					{
+						parameterDescription = description;
+					}
+				}
+				paramDescriptor.setName(parameterName);
+				paramDescriptor.setDescription(parameterDescription);
 				funct.getParameters().add(paramDescriptor);
 			}
 		}
@@ -110,12 +242,13 @@ public final class JRExprAnnotationsUtils {
 		return funct;
 	}
 
-	/*
+	/**
 	 * Creates a support map that maintain for each method name (name as key) 
 	 * a list of Methods found in the Class.
 	 */
 	@SuppressWarnings("deprecation")
-	private static Map<String,List<Method>> buildAnnotatedMethodsCache(Class<?> clazz) {
+	private Map<String,List<Method>> buildAnnotatedMethodsCache(Class<?> clazz) 
+	{
 		Map<String,List<Method>> methodsByNameMap=new HashMap<String, List<Method>>();
 				
 		// First round locate all methods with the JRFunction annotation
@@ -153,5 +286,29 @@ public final class JRExprAnnotationsUtils {
 		
 		return methodsByNameMap;
 	}
-	
+
+	/**
+	 * Retrieves the list of functions contributed in the specified class reference.
+	 * 
+	 * <p>
+	 * The method seeks for annotated methods with the annotation {@link JRExprFunction} 
+	 * in order to build the basic set of functions, and then scan for similar ones to
+	 * decide which parameters are mandatory and which optional. 
+	 * 
+	 * @param clazz the class reference that is supposed to contain expression functions
+	 * @return a list of JR expression functions
+	 */
+	public List<JRExprFunctionBean> getFunctionsList(Class<?> clazz)
+	{
+		Map<String, List<Method>> methodsCache = buildAnnotatedMethodsCache(clazz);
+		
+		List<JRExprFunctionBean> functionsList=new ArrayList<JRExprFunctionBean>();
+		for (String functionName : methodsCache.keySet()){
+			JRExprFunctionBean jrFunction = createJRFunction(methodsCache.get(functionName), clazz);
+			functionsList.add(jrFunction);
+		}
+		
+		return functionsList;
+	}
+
 }
