@@ -12,12 +12,12 @@ import java.util.List;
  */
 public class JRExprFunctionBean implements Comparable<JRExprFunctionBean>{
 
+	private String id;
 	private String name;
-	private String displayName;
 	private String description;
 	private List<JRExprFunctionParameterBean> parameters;
 	private Class<?> returnType;
-	private List<String> categories;
+	private List<JRExprFunctionCategoryBean> categories;
 	private String functionClassName;
 	
 	public JRExprFunctionBean(String functionClassName) {
@@ -29,11 +29,11 @@ public class JRExprFunctionBean implements Comparable<JRExprFunctionBean>{
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getDisplayName() {
-		return displayName;
+	public String getId() {
+		return id;
 	}
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setId(String id) {
+		this.id = id;
 	}
 	public String getDescription() {
 		return description;
@@ -56,13 +56,13 @@ public class JRExprFunctionBean implements Comparable<JRExprFunctionBean>{
 	public void setReturnType(Class<?> returnType) {
 		this.returnType = returnType;
 	}
-	public List<String> getCategories() {
+	public List<JRExprFunctionCategoryBean> getCategories() {
 		if(categories==null){
-			categories=new ArrayList<String>();
+			categories=new ArrayList<JRExprFunctionCategoryBean>();
 		}
 		return categories;
 	}
-	public void setCategories(List<String> categories) {
+	public void setCategories(List<JRExprFunctionCategoryBean> categories) {
 		this.categories = categories;
 	}
 	public String getFunctionClassName() {
